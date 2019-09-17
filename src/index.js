@@ -2,45 +2,68 @@ const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest
 const XHttps = new XMLHttpRequest()
 
 const API = 'https://rickandmortyapi.com/api/character/'
-const CHARACTER_ID = 0
+const RESULTS_NUMB = 0
 
-const fetchData = (url_api, callback) => {
-  XHttps.onreadystatechange = (event) => {
-    if (XHttps.readyState === 4) {
-      if (XHttps.status == 200) {
-        return callback(null, JSON.parse(XHttps.responseText))
-      }
-      else {
-        return callback(url_api)
+let respuestas = []
+
+const fetchData = (url_api) => {
+  return new Promise((resolve, reject) => {
+    XHttps.onreadystatechange = (event) => {
+      if (XHttps.readyState === 4) {
+        if (XHttps.status == 200) resolve(JSON.parse(XHttps.responseText))
+        else reject(`Error URL: ${url_api}`)
       }
     }
-  }
-  XHttps.open('GET', url_api, false)
-  XHttps.send()
+    XHttps.open('GET', url_api, false)
+    XHttps.send()
+  })
 }
 
-fetchData(
-  API, 
-  (error, dataAll) => {
-    if (error) return console.error(`Error 1: ${error}`)
+fetchData(API)
+.then(r => {
+  // respuestas.push(r.info.count)
+  console.info(`Personajes: ${r.info.count}`)
+  return fetchData(`${API}${r.results[RESULTS_NUMB].id}`)
+})
+.then(r => {
+  // respuestas.push([r.id, r.name])
+  console.info(`Personaje No. ${r.id}: ${r.name}`)
+  return fetchData(r.origin.url)
+})
+.then(r => {
+  // respuestas.push(r.dimension)
+  console.info(`Dimensión: ${r.dimension}`)
+})
+.catch(e => {console.error(e)})
+// .then(() => { 
+//   console.info(
+//     `Personajes: ${respuestas[0]}\n` + 
+//     `Personaje No. ${respuestas[1][0]}: ${respuestas[1][1]}\n` +
+//     `Dimensión: ${respuestas[2]}\n`
+//   )  
+// })
 
-    fetchData(
-      `${API}${dataAll.results[CHARACTER_ID].id}`, 
-      (error, character) => {
-        if (error) return console.error(`Error 2: ${error}`)
 
-        fetchData(
-          character.origin.url, 
-          (error, characterLocation) => {
-            if (error) return console.error(`Error 3: ${error}`)
-
-            console.log(
-              `Personajes: ${dataAll.info.count}\n` + 
-              `Primer Personaje: ${character.name}\n` +
-              `Dimensión: ${characterLocation.dimension}\n`)
-          }
-        )
-      }
-    )
-  }
-)
+// ++++ Solución del paso 2 ++++
+// fetchData(
+//   API, 
+//   (error, dataAll) => {
+//     if (error) return console.error(`Error 1: ${error}`)
+//     fetchData(
+//       `${API}${dataAll.results[RESULTS_NUMB].id}`, 
+//       (error, character) => {
+//         if (error) return console.error(`Error 2: ${error}`)
+//         fetchData(
+//           character.origin.url, 
+//           (error, characterLocation) => {
+//             if (error) return console.error(`Error 3: ${error}`)
+//             console.log(
+//               `Personajes: ${dataAll.info.count}\n` + 
+//               `Personaje No. ${character.id}: ${character.name}\n` +
+//               `Dimensión: ${characterLocation.dimension}\n`)
+//           }
+//         )
+//       }
+//     )
+//   }
+// )
