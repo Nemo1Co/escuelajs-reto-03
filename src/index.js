@@ -21,27 +21,22 @@ const fetchData = (url_api) => {
 
 fetchData(API)
 .then(r => {
-  // respuestas.push(r.info.count)
-  console.info(`Personajes: ${r.info.count}`)
+  respuestas.push(r.info.count)
   return fetchData(`${API}${r.results[RESULTS_NUMB].id}`)
 })
 .then(r => {
-  // respuestas.push([r.id, r.name])
-  console.info(`Personaje No. ${r.id}: ${r.name}`)
+  respuestas.push([r.id, r.name])
   return fetchData(r.origin.url)
 })
-.then(r => {
-  // respuestas.push(r.dimension)
-  console.info(`Dimensión: ${r.dimension}`)
+.then(r => {respuestas.push(r.dimension)})
+.then(() => { 
+  console.info(
+    `Personajes: ${respuestas[0]}\n` + 
+    `Personaje No. ${respuestas[1][0]}: ${respuestas[1][1]}\n` +
+    `Dimensión: ${respuestas[2]}\n`
+  )  
 })
 .catch(e => {console.error(e)})
-// .then(() => { 
-//   console.info(
-//     `Personajes: ${respuestas[0]}\n` + 
-//     `Personaje No. ${respuestas[1][0]}: ${respuestas[1][1]}\n` +
-//     `Dimensión: ${respuestas[2]}\n`
-//   )  
-// })
 
 
 // ++++ Solución del paso 2 ++++
